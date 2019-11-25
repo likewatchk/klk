@@ -14,7 +14,7 @@ spi = spidev.SpiDev()
 spi.open(0,0)
 spi.max_speed_hz=500000
 # Pick an open Port (1000+ recommended), must match the server port
-HOST = '192.168.43.154' 
+HOST = '10.27.0.50' 
 # Enter IP or Hostname of your server
 PORT = 12345
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
