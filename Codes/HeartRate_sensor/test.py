@@ -1,41 +1,30 @@
-import spidev
+from pulsesensor import Pulsesensor
+import time
 import RPi.GPIO as GPIO
-import matplotlib
-matplotlib.use("TKAgg")
 import matplotlib.pyplot as plt
 import matplotlib.legend as legend
-import time
-import threading
 
 
-spi = spidev.SpiDev()
-spi.open(0,0)
-spi.max_speed_hz=500000
-line_max = 10
-empty_value=4095
-def read_spi_adc(adcChannel):
-    adcValue=0
-    buff=spi.xfer2([6|(adcChannel&4)>>2,(adcChannel&3)<<6,0])
-    adcValue=((buff[1]&15)<<8)+buff[2]
-    return adcValue
+p = Pulsesensor()
+p.startAsyncBPM()
+
 lstx=[]
 lst_gsr=[]
 fig=plt.gcf()
-ax1 = fig.add_subplot(211)
-ax2 = fig.add_subplot(212)
 fig.show()
 fig.canvas.draw()
 plt.pause(0.01)
 time.sleep(0.5)
 i=0
 count=0
+
 while True:
-    adcValue=read_spi_adc(0)
+    bpm = p.BPM
+    adcValue=bpm
     print(adcValue)
-    print(type(adcValue))
     lst_gsr.append(adcValue)
     lstx.append(i)
-    plt.ylim(0,4096)
+    plt.ylim(0,300)
     i=i+1
     lst_len=len(lstx)
     sum=0
@@ -51,9 +40,10 @@ while True:
     for i in range(st_num,ed_num):
         sum=sum+lst_gsr[i]
     avg= sum/data_count
-    ax1.plot(lstx,lst_gsr,'r.-')
+    plt.plot(lstx,lst_gsr,'r.-')
     fig.canvas.draw()
     plt.pause(0.01)
     time.sleep(0.2)
-GPIO.cleanup()
-exit()
+
+p.stopAsyncBPM()
+
