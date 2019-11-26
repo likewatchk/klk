@@ -19,7 +19,7 @@ i=0
 count=0
 
 while True:
-    bpm = p.BPM
+    bpm = p.BPM /2
     adcValue=bpm
     print(adcValue)
     lst_gsr.append(adcValue)
@@ -44,6 +44,5 @@ while True:
     fig.canvas.draw()
     plt.pause(0.01)
     time.sleep(0.2)
-
+    
 p.stopAsyncBPM()
-

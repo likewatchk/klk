@@ -1,3 +1,4 @@
+import socket
 import spidev
 import RPi.GPIO as GPIO
 import matplotlib
@@ -7,7 +8,26 @@ import matplotlib.legend as legend
 import time
 import threading
 
+HOST = '10.27.6.29' 
+# Server IP or Hostname
+PORT = 12345 
+# Pick an open Port (1000+ recommended), must match the client sport
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print ('Socket created')
+#managing error exception
+try:
+    s.bind((HOST, PORT))
+except socket.error:
+    print ('Bind failed ')
+s.listen(5)
+print ('Socket awaiting messages')
+(conn, addr) = s.accept()
+print ('Connected')
+# awaiting for message
 
+# Close connections
+
+#---
 spi = spidev.SpiDev()
 spi.open(0,0)
 spi.max_speed_hz=500000
@@ -18,8 +38,13 @@ def read_spi_adc(adcChannel):
     buff=spi.xfer2([6|(adcChannel&4)>>2,(adcChannel&3)<<6,0])
     adcValue=((buff[1]&15)<<8)+buff[2]
     return adcValue
+
+
+
 lstx=[]
+#lstx2=[]
 lst_gsr=[]
+lst_pul=[]
 fig=plt.gcf()
 ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212)
@@ -30,12 +55,15 @@ time.sleep(0.5)
 i=0
 count=0
 while True:
+    data = conn.recv(1024)
+    data = float(data.decode(encoding='UTF-8'))
     adcValue=read_spi_adc(0)
-    print(adcValue)
-    print(type(adcValue))
+    print(adcValue,data)
     lst_gsr.append(adcValue)
+    lst_pul.append(data)
     lstx.append(i)
-    plt.ylim(0,4096)
+    #lstx2.append(i)
+    
     i=i+1
     lst_len=len(lstx)
     sum=0
@@ -51,9 +79,13 @@ while True:
     for i in range(st_num,ed_num):
         sum=sum+lst_gsr[i]
     avg= sum/data_count
+    plt.ylim(0,4096)
     ax1.plot(lstx,lst_gsr,'r.-')
+    plt.ylim(0,300)
+    ax2.plot(lstx,lst_pul,'r.-')
     fig.canvas.draw()
     plt.pause(0.01)
     time.sleep(0.2)
+    
 GPIO.cleanup()
 exit()
