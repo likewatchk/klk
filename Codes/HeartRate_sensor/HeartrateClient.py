@@ -24,3 +24,6 @@ while True:
     time.sleep(1)
     s.send(command)
     
+#daslkdjwl;adkal;dkal;skfjl;dsl;kjgdsfl;kgfdl;kgdfl;kgdfl;kgdfl;kgdfl;kfgdlkgfl;kgdfl;kbfvl;kdfbmdl;bm
+#daml;dsal;ksadl;kdasl;kdsal;kdsal;ksadl;kdsalk;dsal;kvcml;kxdfvml;fvl;dskfdl;sfklwefm
+    

@@ -2,11 +2,17 @@ import socket
 import spidev
 import RPi.GPIO as GPIO
 import matplotlib
-matplotlib.use("TKAgg")
 import matplotlib.pyplot as plt
 import matplotlib.legend as legend
 import time
 import threading
+
+def read_spi_adc(adcChannel):
+    adcValue=0
+    buff=spi.xfer2([6|(adcChannel&4)>>2,(adcChannel&3)<<6,0])
+    adcValue=((buff[1]&15)<<8)+buff[2]
+    return adcValue
+#---
 
 HOST = '10.27.6.29' 
 # Server IP or Hostname
@@ -23,28 +29,18 @@ s.listen(5)
 print ('Socket awaiting messages')
 (conn, addr) = s.accept()
 print ('Connected')
-# awaiting for message
-
-# Close connections
 
 #---
+
 spi = spidev.SpiDev()
 spi.open(0,0)
 spi.max_speed_hz=500000
 line_max = 10
 empty_value=4095
-def read_spi_adc(adcChannel):
-    adcValue=0
-    buff=spi.xfer2([6|(adcChannel&4)>>2,(adcChannel&3)<<6,0])
-    adcValue=((buff[1]&15)<<8)+buff[2]
-    return adcValue
-
-
-
 lstx=[]
-#lstx2=[]
 lst_gsr=[]
 lst_pul=[]
+matplotlib.use("TKAgg")
 fig=plt.gcf()
 ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212)
