@@ -1,6 +1,7 @@
 import threading
 import socket
 import tkinter
+import tkinter.font
 import spidev
 import RPi.GPIO as GPIO
 import matplotlib
@@ -18,8 +19,8 @@ def read_spi_adc(adcChannel):
 
 
 def lie_detector_core():
-    global conn, spi, line_max, empty_value, lstx, lst_gsr, lst_pul,
-            fig, ax1, ax2, idx, count, data, adcValue, avg_gsr, avg_pul,flag
+    global conn, spi, line_max, empty_value, lstx, lst_gsr, lst_pul
+    global fig, ax1, ax2, idx, count, data, adcValue, avg_gsr, avg_pul
     
     data = conn.recv(1024)
     data = float(data.decode(encoding='UTF-8')[:11])
@@ -51,31 +52,41 @@ def lie_detector_core():
         sum_pul = sum(lst_pul)
     avg_gsr = sum_gsr/data_count
     avg_pul = sum_pul/data_count
-    if flag:
-        ax1.cla()
-        ax2.cla()
-        limit_gsr = avg_gsr*0.9
-        limit_pul = avg_pul*1.1
-        if adcValue < limit_gsr and data > limit_pul:
-            pass
-        ax1.plot(lstx,lst_gsr,'r.-')
-        ax2.plot(lstx,lst_pul,'b.-')
-        fig.canvas.draw()
-    else:
-        ax1.cla()
-        ax2.cla()
-        ax1.plot(lstx,lst_gsr,'r.-')
-        ax2.plot(lstx,lst_pul,'b.-')
-        fig.canvas.draw()
+    ax1.cla()
+    ax2.cla()
+    ax1.plot(lstx,lst_gsr,'r.-')
+    ax2.plot(lstx,lst_pul,'b.-')
+    fig.canvas.draw()
     lie_detector.after(200, lie_detector_core)
     
 
-def flagset(tf):
-    global flag
-    flag = tf
-    lie_detector.after(30000, flagset, True)
-
+def flagset_t():
+    global data, adcValue, avg_gsr, avg_pul
+    TF_window = tkinter.Tk()
+    TF_window.title("Lie? or Truth?")
+    TF_window.geometry("800x800+300+300")
+    TF_window.resizable(False, False)
+    font = tkinter.font.Font(size=1000)
+    TF_label = tkinter.Label(TF_window, text="???", font=font)
+    TF_label.pack()
     
+    
+    def detection():
+        global data, adcValue, avg_gsr, avg_pul
+        count_lier=0
+        for i in range(10):
+            if data > avg_pul*1.1 and adcValue < avg_gsr*0.9:
+                count_lier += 1
+                #print("in if")
+            time.sleep(0.2)
+    
+        if count_lier > 8:
+            TF_label.config(text="You Lier~!", fg='red')
+        else:
+            TF_label.config(text="Truth!", fg='blue')
+    
+    TF_window.after(200, detection)
+    TF_window.mainloop()
     
 
 #---
@@ -85,8 +96,10 @@ lie_detector.title("Lie Detector")
 lie_detector.geometry("400x400+40+40")
 lie_detector.resizable(False, False)
 
+detect_button = tkinter.Button(lie_detector, text='you lier?', command=flagset_t)
+detect_button.pack(side='bottom')
 
-HOST = '10.27.7.17' 
+HOST = '10.27.6.16' 
 # Server IP or Hostname
 PORT = 12345 
 # Pick an open Port (1000+ recommended), must match the client sport
@@ -105,7 +118,7 @@ print ('Connected')
 
 #------
 
-flag = 0
+flag = False
 idx = 0
 count=0
 spi = spidev.SpiDev()
