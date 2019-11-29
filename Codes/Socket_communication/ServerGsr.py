@@ -18,7 +18,8 @@ def read_spi_adc(adcChannel):
 
 
 def lie_detector_core():
-    global conn, spi, line_max, empty_value, lstx, lst_gsr, lst_pul, fig, ax1, ax2, idx, count
+    global conn, spi, line_max, empty_value, lstx, lst_gsr, lst_pul,
+            fig, ax1, ax2, idx, count, data, adcValue, avg_gsr, avg_pul,flag
     
     data = conn.recv(1024)
     data = float(data.decode(encoding='UTF-8')[:11])
@@ -50,12 +51,30 @@ def lie_detector_core():
         sum_pul = sum(lst_pul)
     avg_gsr = sum_gsr/data_count
     avg_pul = sum_pul/data_count
-    ax1.cla()
-    ax2.cla()
-    ax1.plot(lstx,lst_gsr,'r.-')
-    ax2.plot(lstx,lst_pul,'b.-')
-    fig.canvas.draw()
+    if flag:
+        ax1.cla()
+        ax2.cla()
+        limit_gsr = avg_gsr*0.9
+        limit_pul = avg_pul*1.1
+        if adcValue < limit_gsr and data > limit_pul:
+            pass
+        ax1.plot(lstx,lst_gsr,'r.-')
+        ax2.plot(lstx,lst_pul,'b.-')
+        fig.canvas.draw()
+    else:
+        ax1.cla()
+        ax2.cla()
+        ax1.plot(lstx,lst_gsr,'r.-')
+        ax2.plot(lstx,lst_pul,'b.-')
+        fig.canvas.draw()
     lie_detector.after(200, lie_detector_core)
+    
+
+def flagset(tf):
+    global flag
+    flag = tf
+    lie_detector.after(30000, flagset, True)
+
     
     
 
@@ -86,6 +105,7 @@ print ('Connected')
 
 #------
 
+flag = 0
 idx = 0
 count=0
 spi = spidev.SpiDev()
