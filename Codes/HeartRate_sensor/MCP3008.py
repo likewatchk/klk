@@ -25,7 +25,5 @@ class MCP3008:
         data = ((adc[1] & 3) << 8) + adc[2]
         return data
             
-buff=spi.xfer2([6|(adcChannel&4)>>2,(adcChannel&3)<<6,0])
-    adcValue=((buff[1]&15)<<8)+buff[2]
     def close(self):
         self.spi.close()
