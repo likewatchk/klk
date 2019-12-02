@@ -60,7 +60,7 @@ def lie_detector_core():
     lie_detector.after(200, lie_detector_core)
     
 
-def flagset_t():
+def detecting_window():
     global data, adcValue, avg_gsr, avg_pul
     TF_window = tkinter.Tk()
     TF_window.title("Lie? or Truth?")
@@ -96,7 +96,7 @@ lie_detector.title("Lie Detector")
 lie_detector.geometry("400x400+40+40")
 lie_detector.resizable(False, False)
 
-detect_button = tkinter.Button(lie_detector, text='you lier?', command=flagset_t)
+detect_button = tkinter.Button(lie_detector, text='you lier?', command=detecting_window)
 detect_button.pack(side='bottom')
 
 HOST = '10.27.6.16' 
